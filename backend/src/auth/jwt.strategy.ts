@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { AppError } from 'src/utils/error-handeling/app.error';
-import { Messages } from 'src/utils/repo/message.resource';
+import { AppError } from '../utils/error-handeling/app.error';
+import { Messages } from '../utils/repo/message.resource';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {

@@ -3,35 +3,55 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserResponseModel } from '../common/models/response.model';
-import { DatabaseService } from 'src/services/database.service';
-import { AppError, BadRequestError, UnauthorizedError } from 'src/utils/error-handeling/app.error';
-import { Messages } from 'src/utils/repo/message.resource';
+import {
+  AppError,
+  BadRequestError,
+  UnauthorizedError,
+} from '../utils/error-handeling/app.error';
+import { Messages } from '../utils/repo/message.resource';
+import { DatabaseService } from '../services/database.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private databaseService: DatabaseService
+    private databaseService: DatabaseService,
   ) {}
 
-  async register(username: string, email: string, password: string): Promise<UserResponseModel> {
+  async register(
+    username: string,
+    email: string,
+    password: string,
+  ): Promise<UserResponseModel> {
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
       const queryText = 'CALL register_user($1, $2, $3)';
-      const res = await this.databaseService.execute(queryText, [username, email, hashedPassword]);
+      const res = await this.databaseService.execute(queryText, [
+        username,
+        email,
+        hashedPassword,
+      ]);
       return res.rows[0];
     } catch (error) {
-      if (error.code === '23505') { // Unique violation
-        throw new BadRequestError(Messages.EMAIL_ALREADY_EXISTS);
+      if (error instanceof Error) {
+        if (error.message.includes('23505')) {
+          // Unique violation
+          throw new BadRequestError(Messages.EMAIL_ALREADY_EXISTS);
+        }
+        throw new AppError(Messages.INTERNAL_SERVER_ERROR, 500);
+      } else {
+        throw new AppError('Unknown error occurred', 500);
       }
-      throw new AppError(Messages.INTERNAL_SERVER_ERROR, 500);
     }
   }
 
   async login(email: string, password: string): Promise<UserResponseModel> {
     try {
       const queryText = 'SELECT * FROM login_user($1, $2)';
-      const res = await this.databaseService.execute(queryText, [email, password]);
+      const res = await this.databaseService.execute(queryText, [
+        email,
+        password,
+      ]);
       if (res.rows.length > 0) {
         const user = res.rows[0];
         const payload = { id: user.id, email: user.email };
@@ -42,8 +62,11 @@ export class AuthService {
     } catch (error) {
       if (error instanceof UnauthorizedError) {
         throw error;
+      } else if (error instanceof Error) {
+        throw new AppError(Messages.INTERNAL_SERVER_ERROR, 500);
+      } else {
+        throw new AppError('Unknown error occurred', 500);
       }
-      throw new AppError(Messages.INTERNAL_SERVER_ERROR, 500);
     }
   }
 
@@ -60,7 +83,11 @@ export class AuthService {
       }
       return null;
     } catch (error) {
-      throw new AppError(Messages.INTERNAL_SERVER_ERROR, 500);
+      if (error instanceof Error) {
+        throw new AppError(Messages.INTERNAL_SERVER_ERROR, 500);
+      } else {
+        throw new AppError('Unknown error occurred', 500);
+      }
     }
   }
 }

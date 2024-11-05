@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DatabaseUtil } from 'src/utils/database/database.util';
-import { logEvents } from 'src/utils/error-handeling/log-error.handeler.middleware';
+import { DatabaseUtil } from '../utils/database/database.util';
+import { logEvents } from '../utils/error-handeling/log-error.handeler.middleware';
 
 @Injectable()
 export class DatabaseService {
@@ -16,8 +16,16 @@ export class DatabaseService {
       const result = await this.dbUtil.query(queryText, params);
       return result;
     } catch (error) {
-      await logEvents(`Error executing query: ${error.message}`, 'errLog.log');
-      throw error;
+      if (error instanceof Error) {
+        await logEvents(
+          `Error executing query: ${error.message}`,
+          'errLog.log',
+        );
+        throw error;
+      } else {
+        await logEvents(`Unknown error executing query`, 'errLog.log');
+        throw new Error('Unknown error executing query');
+      }
     }
   }
 }

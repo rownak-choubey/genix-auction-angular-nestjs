@@ -2,7 +2,7 @@ import { ExceptionFilter, Catch, ArgumentsHost, HttpException } from '@nestjs/co
 import { Request, Response } from 'express';
 import { logEvents } from './log-error.handeler.middleware';
 import { AppError } from './app.error';
-import { ResponseDataModel } from 'src/common/models/response.model';
+import { ResponseDataModel } from '../../common/models/response.model';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {

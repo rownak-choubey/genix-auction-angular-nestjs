@@ -1,4 +1,3 @@
-// src/common/utils/database.util.ts
 import { Pool } from 'pg';
 import { ConfigService } from '@nestjs/config';
 import { logEvents } from '../error-handeling/log-error.handeler.middleware';
@@ -21,7 +20,7 @@ export class DatabaseUtil {
     try {
       const res = await client.query(queryText, params);
       return res;
-    } catch (error) {
+    } catch (error: any) {
       await logEvents(`Database query error: ${error.message}`, 'errLog.log');
       throw error;
     } finally {

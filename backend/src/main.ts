@@ -2,7 +2,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { logger, errorHandler } from './utils/error-handeling/log-error.handeler.middleware';
-import * as express from 'express';
+import express from 'express';
 import * as path from 'path';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { Request, Response } from 'express';

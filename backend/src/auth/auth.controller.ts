@@ -1,6 +1,7 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserResponseModel } from '../common/models/response.model';
+import { JwtAuthGuard } from './auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -16,5 +17,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(@Body() credentials: { email: string, password: string }): Promise<UserResponseModel> {
     return this.authService.login(credentials.email, credentials.password);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('protected')
+  @HttpCode(HttpStatus.OK)
+  getProtected(): string {
+    return 'This is a protected route';
   }
 }

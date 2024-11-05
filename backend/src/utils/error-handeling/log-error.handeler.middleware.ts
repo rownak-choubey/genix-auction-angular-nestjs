@@ -13,7 +13,7 @@ const logEvents = async (message: string, logFileName: string) => {
       await fs.mkdir(logsDir);
     }
     await fs.appendFile(path.join(logsDir, logFileName), logItem);
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to log event:', err.message);
   }
 };
